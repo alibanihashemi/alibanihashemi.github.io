@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 ﻿
 
 
@@ -152,6 +152,14 @@ header {
 
 .logo {
     max-width: 100px;
+}
+
+.logo__img {
+    display:block;
+    box-shadow:0 0 0 0;
+    width: 50rem;
+    max-width:150%;
+    
 }
 
 .nav {
@@ -841,6 +849,14 @@ header {
     max-width: 500px;
     margin: 0 auto;
 }
+.phd {
+    text-decoration: none;
+    color: var(--clr-accent)
+    
+}
+    .phd:hover {
+        text-decoration:underline;
+    }
 
 @media (min-width: 800px) {
     .services {
@@ -913,6 +929,7 @@ header {
 .portfolio__item {
     background: var(--clr-accent);
     overflow: hidden;
+    justify-content:center;
 }
 
 .portfolio__img {
@@ -1001,7 +1018,4 @@ header {
         margin: 20px 0; /* Vertical margin */
     }
 
-.phone-link {
-    display: none;
-}
->>>>>>> 5aef086a7c37a5f9cb6224c5bdd1181574b1f743
+
