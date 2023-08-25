@@ -1007,6 +1007,8 @@ header {
         margin-right: auto;
     }
 
+
+/* footer */
 .mail_and_phone {
     display: flex;
     flex-direction: column; /* Adjusted for column layout */
