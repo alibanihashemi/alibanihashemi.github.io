@@ -927,13 +927,14 @@ header {
 }
 
 .portfolio__item {
-    background: var(--clr-accent);
+    background: var(--clr-dark);
     overflow: hidden;
     justify-content:center;
 }
 
 .portfolio__img {
     transition: transform 750ms cubic-bezier(.5, 0, .5, 1), opacity 250ms linear;
+    padding:3rem;
 }
 
 .portfolio__item:focus {
@@ -1001,11 +1002,11 @@ header {
     margin: 0 auto;
 }
 
-    .portfolio-item-individual p {
-        max-width: 600px;
-        margin-left: auto;
-        margin-right: auto;
-    }
+.portfolio-item-individual p {
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
 
 
 /* footer */
