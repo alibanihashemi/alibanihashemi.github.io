@@ -1,139 +1,427 @@
-import { useState } from 'react';
-import './App.css';
+import { useState } from 'react'
+import type { ParseResult } from './utils/DNAParser'
+import { parseDNAFile } from './utils/DNAParser'
+import RiskReport from './components/RiskReport'
+import GenomeBrowser from './components/GenomeBrowser'
+import BabyRiskReport from './components/BabyRiskReport'
+
+type AppMode = 'individual' | 'baby';
 
 function App() {
-  const [navOpen, setNavOpen] = useState(false);
+  const [mode, setMode] = useState<AppMode>('individual');
+  const [data, setData] = useState<ParseResult | null>(null);
+  const [parent1Data, setParent1Data] = useState<ParseResult | null>(null);
+  const [parent2Data, setParent2Data] = useState<ParseResult | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [loadingParent, setLoadingParent] = useState<1 | 2 | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const toggleNav = () => {
-    setNavOpen(!navOpen);
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      await new Promise(r => setTimeout(r, 100));
+      const result = await parseDNAFile(file);
+      setData(result);
+    } catch (err) {
+      console.error(err);
+      setError("Failed to parse file. Please ensure it's a valid raw DNA file (txt/csv).");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const closeNav = () => {
-    setNavOpen(false);
+  const handleParentUpload = async (parentNum: 1 | 2, event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setLoadingParent(parentNum);
+    setError(null);
+
+    try {
+      await new Promise(r => setTimeout(r, 100));
+      const result = await parseDNAFile(file);
+      if (parentNum === 1) {
+        setParent1Data(result);
+      } else {
+        setParent2Data(result);
+      }
+    } catch (err) {
+      console.error(err);
+      setError(`Failed to parse Parent ${parentNum} file.`);
+    } finally {
+      setLoadingParent(null);
+    }
   };
+
+  const loadSampleForParent = async (parentNum: 1 | 2, sampleType: 'myheritage' | '23andme') => {
+    setLoadingParent(parentNum);
+    try {
+      const url = sampleType === 'myheritage' ? '/sample.csv' : '/sample_23andme.txt';
+      const res = await fetch(url);
+      const blob = await res.blob();
+      const file = new File([blob], `sample_${sampleType}.${sampleType === 'myheritage' ? 'csv' : 'txt'}`, { type: 'text/plain' });
+      const result = await parseDNAFile(file);
+      if (parentNum === 1) {
+        setParent1Data(result);
+      } else {
+        setParent2Data(result);
+      }
+    } catch (err) {
+      console.error(err);
+      setError(`Failed to load sample for Parent ${parentNum}.`);
+    } finally {
+      setLoadingParent(null);
+    }
+  };
+
+  const resetAll = () => {
+    setData(null);
+    setParent1Data(null);
+    setParent2Data(null);
+    setError(null);
+  };
+
+  const hasData = mode === 'individual' ? data : (parent1Data && parent2Data);
 
   return (
-    <div className={navOpen ? 'nav-open' : ''}>
-      <header>
-        <div className="logo">
-          <img src="/img/logo.png" alt="The owners name: Ali Banihashemi" className="logo__img" />
-        </div>
-        <button className="nav-toggle" aria-label="toggle navigation" onClick={toggleNav}>
-          <span className="hamburger"></span>
-        </button>
-        <nav className="nav">
-          <ul className="nav__list">
-            <li className="nav__item"><a href="#home" className="nav__link" onClick={closeNav}>Home</a></li>
-            <li className="nav__item"><a href="#services" className="nav__link" onClick={closeNav}>My Services</a></li>
-            <li className="nav__item"><a href="#about" className="nav__link" onClick={closeNav}>About me</a></li>
-            <li className="nav__item"><a href="#work" className="nav__link" onClick={closeNav}>My Work</a></li>
-          </ul>
-        </nav>
-      </header>
+    <div className="min-h-screen p-4 md:p-8">
+      <div className="max-w-7xl mx-auto space-y-6">
 
-      {/* Introduction */}
-      <section className="intro" id="home">
-        <h1 className="section__title section__title--intro">
-          Hi, I am <strong>Ali Banihashemi</strong>
-        </h1>
-        <img src="/img/park.jpg" className="intro__img" alt="Ali in the park" />
-        <p className="section__subtitle section__subtitle--intro">researcher & front-end dev</p>
-      </section>
-
-      {/* My services */}
-      <section className="my-services" id="services">
-        <h2 className="section__title section__title--services">What I do</h2>
-        <div className="services">
-          <div className="service">
-            <h3>Design + Development</h3>
-            <p>Hello! I'm Ali, a junior React developer with a passion for building intuitive, responsive, and efficient web applications. While I'm still in the early stages of my professional journey, I pride myself on my strong foundation in JavaScript and my dedication to continuous learning in the ever-evolving world of web development.</p>
+        {/* Header */}
+        <header className="glass-card-elevated px-6 py-4 flex items-center justify-between animate-fade-in-up">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-2xl shadow-lg glow-accent">
+              {mode === 'individual' ? '🧬' : '👶'}
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold gradient-text tracking-tight">
+                Antigravity Genetic Analyzer
+              </h1>
+              <p className="text-sm text-gray-400">
+                {mode === 'individual' ? 'Advanced DNA Analysis' : 'Baby Genetic Risk Calculator'}
+              </p>
+            </div>
           </div>
-          <div className="service">
-            <h3>Modeler</h3>
-            <p>Using <strong>Python</strong>, I specialize in agent-based modeling (ABM). This powerful language has enabled me to intertwine complex systems with tangible business challenges. My simulations, crafted through Python, encapsulate the nuances of multifaceted phenomena, offering profound insights.</p>
+          <div className="flex items-center gap-4">
+            {/* Mode Toggle */}
+            <div className="glass-card p-1 flex gap-1">
+              <button
+                onClick={() => { setMode('individual'); resetAll(); }}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${mode === 'individual'
+                    ? 'bg-indigo-500 text-white'
+                    : 'text-gray-400 hover:text-white'
+                  }`}
+              >
+                🧬 Individual
+              </button>
+              <button
+                onClick={() => { setMode('baby'); resetAll(); }}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${mode === 'baby'
+                    ? 'bg-pink-500 text-white'
+                    : 'text-gray-400 hover:text-white'
+                  }`}
+              >
+                👶 Baby Mode
+              </button>
+            </div>
+            {hasData && (
+              <button
+                onClick={resetAll}
+                className="btn-ghost text-sm flex items-center gap-2"
+              >
+                <span>↺</span> Reset
+              </button>
+            )}
           </div>
-          <div className="service">
-            <h3>Researcher</h3>
-            <p>I'm, a passionate <a href="https://www.aau.at/blog/sind-entscheidungen-besser-wenn-sie-von-vielen-getroffen-werden/" className="phd">researcher</a>. Venturing beyond the traditional boundaries of business research, my work dives deep into the captivating realm of 'Open Strategy'. My approach is not just theoretical; it is deeply rooted in Computational Social Science, a fusion that offers nuanced and technologically-driven insights into the intricate world of strategic management.</p>
+        </header>
+
+        {/* Individual Mode */}
+        {mode === 'individual' && !data && (
+          <div className="animate-fade-in-up delay-100" style={{ animationFillMode: 'both' }}>
+            <div className="glass-card-elevated upload-zone py-20 px-8 flex flex-col items-center justify-center cursor-pointer relative">
+              <input
+                type="file"
+                onChange={handleFileUpload}
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                accept=".txt,.csv,.zip"
+              />
+
+              <div className="text-7xl mb-6 animate-float">🧬</div>
+
+              <h2 className="text-2xl font-bold text-white mb-2">
+                Upload Your Raw DNA File
+              </h2>
+              <p className="text-gray-400 text-center max-w-md">
+                Drag & drop or click to upload. Supports 23andMe, AncestryDNA, and MyHeritage formats.
+              </p>
+
+              <div className="mt-8 flex flex-wrap justify-center gap-3">
+                <span className="glass-card px-4 py-2 text-sm text-gray-300 flex items-center gap-2">
+                  <span className="text-green-400">🔒</span> Client-side only
+                </span>
+                <span className="glass-card px-4 py-2 text-sm text-gray-300 flex items-center gap-2">
+                  <span className="text-blue-400">🚫</span> No data uploads
+                </span>
+                <span className="glass-card px-4 py-2 text-sm text-gray-300 flex items-center gap-2">
+                  <span className="text-purple-400">✓</span> 100% Private
+                </span>
+              </div>
+
+              <div className="mt-8 flex gap-4">
+                <button
+                  onClick={async (e) => {
+                    e.stopPropagation();
+                    setLoading(true);
+                    try {
+                      const res = await fetch('/sample.csv');
+                      const blob = await res.blob();
+                      const file = new File([blob], 'MyHeritage_sample.csv', { type: 'text/csv' });
+                      const result = await parseDNAFile(file);
+                      setData(result);
+                    } catch (err) {
+                      console.error(err);
+                      setError("Failed to load sample file.");
+                    } finally {
+                      setLoading(false);
+                    }
+                  }}
+                  className="btn-primary z-10 relative"
+                >
+                  🧪 Load MyHeritage Sample
+                </button>
+                <button
+                  onClick={async (e) => {
+                    e.stopPropagation();
+                    setLoading(true);
+                    try {
+                      const res = await fetch('/sample_23andme.txt');
+                      const blob = await res.blob();
+                      const file = new File([blob], '23andMe_sample.txt', { type: 'text/plain' });
+                      const result = await parseDNAFile(file);
+                      setData(result);
+                    } catch (err) {
+                      console.error(err);
+                      setError("Failed to load sample file.");
+                    } finally {
+                      setLoading(false);
+                    }
+                  }}
+                  className="btn-ghost border border-white/10 z-10 relative"
+                >
+                  🧪 Load 23andMe Sample
+                </button>
+              </div>
+
+              {loading && (
+                <div className="mt-10 flex flex-col items-center gap-4">
+                  <div className="dna-loader"></div>
+                  <p className="text-indigo-400 font-medium animate-pulse">
+                    Analyzing genomic data...
+                  </p>
+                </div>
+              )}
+
+              {error && (
+                <div className="mt-8 glass-card px-6 py-3 border border-red-500/30 text-red-400">
+                  ⚠️ {error}
+                </div>
+              )}
+            </div>
           </div>
-        </div>
-        <a href="#work" className="btn">My Work</a>
-      </section>
+        )}
 
-      {/* About me */}
-      <section className="about-me" id="about">
-        <h2 className="section__title section__title--about">Who I am</h2>
-        <p className="section__subtitle section__subtitle--about">Designer & developer based out of NYC</p>
+        {/* Baby Mode - Dual Upload */}
+        {mode === 'baby' && !(parent1Data && parent2Data) && (
+          <div className="animate-fade-in-up delay-100" style={{ animationFillMode: 'both' }}>
+            <div className="glass-card-elevated p-8">
+              <div className="text-center mb-8">
+                <div className="text-6xl mb-4">👶</div>
+                <h2 className="text-2xl font-bold text-white mb-2">Baby Genetic Risk Calculator</h2>
+                <p className="text-gray-400 max-w-xl mx-auto">
+                  Upload DNA files from both parents to calculate the probability of genetic conditions in your future child using Mendelian inheritance.
+                </p>
+              </div>
 
-        <div className="about-me__body">
-          <p>
-            Welcome to my portfolio! I'm Ali Banihashemi, a Ph.D. student in Business Administration at the University of Klagenfurt. With a Bachelor's in Electronics and a Master's in Business Administration, I blend technical expertise with business insights.
-          </p>
-          <p>
-            Python is my go-to for research, and I love using React to create beautiful, reactive web pages. Explore my projects that showcase my passion for technology and business. Let's make a positive impact together! Feel free to connect.
-          </p>
-        </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Parent 1 */}
+                <div className={`glass-card p-6 rounded-xl border-2 transition-all ${parent1Data ? 'border-green-500/50 bg-green-500/5' : 'border-dashed border-white/20'
+                  }`}>
+                  <div className="text-center">
+                    <div className="text-5xl mb-3">👨</div>
+                    <h3 className="text-lg font-bold text-white mb-1">Parent 1 (Father)</h3>
+                    {parent1Data ? (
+                      <div className="space-y-2">
+                        <p className="text-green-400 flex items-center justify-center gap-2">
+                          <span>✓</span> Loaded: {parent1Data.meta.source}
+                        </p>
+                        <p className="text-sm text-gray-400">
+                          {parent1Data.snps.length.toLocaleString()} SNPs
+                        </p>
+                        <button
+                          onClick={() => setParent1Data(null)}
+                          className="text-xs text-red-400 hover:underline"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    ) : (
+                      <div>
+                        <p className="text-gray-400 text-sm mb-4">Upload DNA file</p>
+                        <div className="relative">
+                          <input
+                            type="file"
+                            onChange={(e) => handleParentUpload(1, e)}
+                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                            accept=".txt,.csv,.zip"
+                          />
+                          <button className="btn-primary w-full">
+                            {loadingParent === 1 ? 'Loading...' : 'Select File'}
+                          </button>
+                        </div>
+                        <div className="mt-3 flex gap-2 justify-center">
+                          <button
+                            onClick={() => loadSampleForParent(1, 'myheritage')}
+                            className="text-xs text-indigo-400 hover:underline"
+                          >
+                            Load Sample
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
 
-        <img src="/img/profile.jpg" alt="Ali in park" className="about-me__img" />
-      </section>
+                {/* Parent 2 */}
+                <div className={`glass-card p-6 rounded-xl border-2 transition-all ${parent2Data ? 'border-green-500/50 bg-green-500/5' : 'border-dashed border-white/20'
+                  }`}>
+                  <div className="text-center">
+                    <div className="text-5xl mb-3">👩</div>
+                    <h3 className="text-lg font-bold text-white mb-1">Parent 2 (Mother)</h3>
+                    {parent2Data ? (
+                      <div className="space-y-2">
+                        <p className="text-green-400 flex items-center justify-center gap-2">
+                          <span>✓</span> Loaded: {parent2Data.meta.source}
+                        </p>
+                        <p className="text-sm text-gray-400">
+                          {parent2Data.snps.length.toLocaleString()} SNPs
+                        </p>
+                        <button
+                          onClick={() => setParent2Data(null)}
+                          className="text-xs text-red-400 hover:underline"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    ) : (
+                      <div>
+                        <p className="text-gray-400 text-sm mb-4">Upload DNA file</p>
+                        <div className="relative">
+                          <input
+                            type="file"
+                            onChange={(e) => handleParentUpload(2, e)}
+                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                            accept=".txt,.csv,.zip"
+                          />
+                          <button className="btn-primary w-full">
+                            {loadingParent === 2 ? 'Loading...' : 'Select File'}
+                          </button>
+                        </div>
+                        <div className="mt-3 flex gap-2 justify-center">
+                          <button
+                            onClick={() => loadSampleForParent(2, '23andme')}
+                            className="text-xs text-indigo-400 hover:underline"
+                          >
+                            Load Sample
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
 
-      {/* My Work */}
-      <section className="my-work" id="work">
-        <h2 className="section__title section__title--work">My work</h2>
-        <p className="section__subtitle section__subtitle--work">A selection of my range of work</p>
+              {/* Privacy badges */}
+              <div className="mt-8 flex flex-wrap justify-center gap-3">
+                <span className="glass-card px-4 py-2 text-sm text-gray-300 flex items-center gap-2">
+                  <span className="text-green-400">🔒</span> Client-side only
+                </span>
+                <span className="glass-card px-4 py-2 text-sm text-gray-300 flex items-center gap-2">
+                  <span className="text-pink-400">👶</span> Mendelian Genetics
+                </span>
+                <span className="glass-card px-4 py-2 text-sm text-gray-300 flex items-center gap-2">
+                  <span className="text-purple-400">✓</span> 100% Private
+                </span>
+              </div>
 
-        <div className="portfolio">
-          {/* Portfolio item 01 */}
-          <a href="#" className="portfolio__item">
-            <img src="/img/agent.JPG" alt="" className="portfolio__img" />
-          </a>
+              {error && (
+                <div className="mt-6 glass-card px-6 py-3 border border-red-500/30 text-red-400 text-center">
+                  ⚠️ {error}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
-          {/* Portfolio item 02 */}
-          <a href="#" className="portfolio__item">
-            <img src="/img/calculator.jpg" alt="" className="portfolio__img" />
-          </a>
+        {/* Individual Mode - Results */}
+        {mode === 'individual' && data && (
+          <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
+            {/* Sidebar */}
+            <div className="xl:col-span-1 space-y-6 animate-fade-in-up" style={{ animationFillMode: 'both' }}>
+              <div className="glass-card-elevated p-5">
+                <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                  <span className="text-indigo-400">📊</span> File Summary
+                </h3>
+                <div className="space-y-3 text-sm">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-400">Source</span>
+                    <span className="font-semibold text-indigo-400 glass-card px-2 py-0.5 text-xs">
+                      {data.meta.source}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-400">Total SNPs</span>
+                    <span className="font-bold text-white text-lg">
+                      {data.meta.totalSNPs.toLocaleString()}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-400">Processed</span>
+                    <span className="font-mono text-xs text-gray-500">
+                      {new Date(data.meta.timestamp).toLocaleTimeString()}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <GenomeBrowser snps={data.snps} />
+            </div>
 
-          {/* Portfolio item 03 */}
-          <a href="#" className="portfolio__item">
-            <img src="/img/openstrategy.jpg" alt="" className="portfolio__img" />
-          </a>
+            {/* Main Content */}
+            <div className="xl:col-span-3 animate-fade-in-up delay-200" style={{ animationFillMode: 'both' }}>
+              <RiskReport snps={data.snps} />
+            </div>
+          </div>
+        )}
 
-          {/* Portfolio item 04 */}
-          <a href="#" className="portfolio__item">
-            <img src="/img/openstrategy.png" alt="" className="portfolio__img" />
-          </a>
+        {/* Baby Mode - Results */}
+        {mode === 'baby' && parent1Data && parent2Data && (
+          <div className="animate-fade-in-up" style={{ animationFillMode: 'both' }}>
+            <BabyRiskReport
+              parent1Snps={parent1Data.snps}
+              parent2Snps={parent2Data.snps}
+              parent1Name="Father"
+              parent2Name="Mother"
+            />
+          </div>
+        )}
 
-           {/* Portfolio item 05 */}
-           <a href="#" className="portfolio__item">
-            <img src="/img/strategy.jpg" alt="" className="portfolio__img" />
-          </a>
-          
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="footer">
-        <div className="mail_and_phone">
-          <a href="mailto:salibanihashemie@gmail.com" className="footer__link">salibanihashemie@gmail.com</a>
-        </div>
-        <div>
-          <a href="tel:+4367764373262" className="footer__link">+43 677 64373262<span className="phone-link">+43 677 64373262</span></a>
-        </div>
-        <ul className="social-list">
-          <li className="social-list__item">
-            <a className="social-list__link" href="https://linkedin.com/in/ali-banihashemi-1a193324a">
-              <i className="fab fa-linkedin"></i>
-            </a>
-          </li>
-          <li className="social-list__item">
-            <a className="social-list__link" href="https://github.com/alibanihashemi">
-              <i className="fab fa-github"></i>
-            </a>
-          </li>
-        </ul>
-      </footer>
+      </div>
     </div>
-  );
+  )
 }
 
-export default App;
+export default App
