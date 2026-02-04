@@ -40,12 +40,12 @@ export const parseDNAFile = (file: File): Promise<ParseResult> => {
               if (line.length === 0) continue;
               const lineStr = line.join(' ');
               
-              if (lineStr.includes('23andMe')) source = '23andMe';
-              if (lineStr.includes('MyHeritage')) source = 'MyHeritage';
-              if (lineStr.includes('Ancestry')) source = 'Ancestry';
-
-              // Detect header row (rsid, chromosome, position, genotype)
-              if (
+                        if (lineStr.includes('23andMe')) source = '23andMe';
+                        if (lineStr.includes('MyHeritage')) source = 'MyHeritage';
+                        if (lineStr.includes('Ancestry')) source = 'Ancestry';
+                        console.log(`Detected source: ${source}`);
+              
+                        // Detect header row (rsid, chromosome, position, genotype)              if (
                   (lineStr.toLowerCase().includes('rsid') || lineStr.toLowerCase().includes('rs id')) &&
                   lineStr.toLowerCase().includes('chromosome')
               ) {
@@ -102,6 +102,9 @@ export const parseDNAFile = (file: File): Promise<ParseResult> => {
               genotype
             });
           }
+
+          console.log(`Successfully parsed ${snps.length} SNPs.`);
+          if (snps.length > 0) console.log('First SNP parsed:', snps[0]);
 
           resolve({
             snps,

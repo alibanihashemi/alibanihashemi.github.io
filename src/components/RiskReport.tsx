@@ -22,9 +22,11 @@ const RiskReport: React.FC<RiskReportProps> = ({ snps }) => {
     snps.forEach(snp => {
       snpMap.set(snp.rsid, snp.genotype);
     });
+    console.log(`Matching against SNP map with ${snpMap.size} entries.`);
 
     riskAlleles.forEach(risk => {
       const userGenotype = snpMap.get(risk.rsid);
+      if (userGenotype) console.log(`Found user data for ${risk.rsid}: ${userGenotype} (Risk allele: ${risk.riskAllele})`);
 
       if (userGenotype) {
         // Count how many risk alleles are present
@@ -38,6 +40,7 @@ const RiskReport: React.FC<RiskReportProps> = ({ snps }) => {
         }
 
         if (riskCount > 0) {
+          console.log(`MATCH DETECTED: ${risk.riskInfo.condition} (${risk.matchType})`);
           findings.push({
             riskInfo: risk,
             userGenotype,
