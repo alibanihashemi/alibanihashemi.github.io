@@ -1,4 +1,5 @@
 import Papa from 'papaparse';
+import JSZip from 'jszip';
 
 export interface SNP {
   rsid: string;
@@ -16,56 +17,44 @@ export interface ParseResult {
   };
 }
 
-export const parseDNAFile = (file: File): Promise<ParseResult> => {
+const parseTextContent = (content: string, fileName: string): Promise<ParseResult> => {
   return new Promise((resolve, reject) => {
-    Papa.parse(file, {
+    Papa.parse(content, {
       worker: true,
       skipEmptyLines: true,
-      comments: "#", // Explicitly handle # comments to avoid delimiter confusion
+      comments: "#",
       complete: (results) => {
         try {
           const snps: SNP[] = [];
           let source = 'Unknown';
-          const lines = results.data as string[][]; // Papa removes comments, so these are data lines
+          const lines = results.data as string[][];
 
-          // Heuristic to detect source based on file content (even if comments are stripped)
-          // 23andMe usually has 4 columns: rsid, chromosome, position, genotype
+          // Heuristic to detect source
           if (lines.length > 0) {
-            // Look for a line that starts with 'rs'
             const firstLineWithData = lines.find(l => {
-              // If Papa failed to split tabs, l[0] might contain the whole line
               const s = l[0].toString();
               return s.startsWith('rs') || (l.length > 1 && l[0].startsWith('rs'));
             });
 
             if (firstLineWithData) {
               if (firstLineWithData.length === 4) source = '23andMe';
-              // MyHeritage often has 5 columns or different structure
             }
           }
 
-          // Use file name as a secondary hint
-          if (file.name.toLowerCase().includes('23andme')) source = '23andMe';
-          if (file.name.toLowerCase().includes('myheritage')) source = 'MyHeritage';
-          if (file.name.toLowerCase().includes('ancestry')) source = 'Ancestry';
+          if (fileName.toLowerCase().includes('23andme')) source = '23andMe';
+          if (fileName.toLowerCase().includes('myheritage')) source = 'MyHeritage';
+          if (fileName.toLowerCase().includes('ancestry')) source = 'Ancestry';
 
           console.log(`Detected source: ${source}`);
 
           for (let i = 0; i < lines.length; i++) {
             const row = lines[i];
 
-            // Skip header if it got through (though comments: '#' should catch most 23andMe headers)
             if (row[0] === 'rsid' || row[0] === '# rsid') continue;
-
             if (row.length === 0) continue;
-
-            // 23andMe format: rsid, chromosome, position, genotype
-            // Sometimes tab separated, Papa parse handles this if auto-detect works, 
-            // but if it failed to detect tab, row might be length 1.
 
             let parts = row;
             if (row.length === 1 && typeof row[0] === 'string' && row[0].includes('\t')) {
-              // Manual fallback for tab separation if Papa failed
               parts = row[0].split('\t');
             }
 
@@ -82,11 +71,10 @@ export const parseDNAFile = (file: File): Promise<ParseResult> => {
               genotype = parts[3] + parts[4];
             }
 
-            // Clean genotype (remove newlines, spaces)
             genotype = genotype ? genotype.trim() : '';
 
             if (!rsid || !chromosome || isNaN(position) || !genotype) continue;
-            if (genotype === '--' || genotype === '__') continue; // Skip no-calls
+            if (genotype === '--' || genotype === '__') continue;
 
             snps.push({
               rsid,
@@ -97,7 +85,6 @@ export const parseDNAFile = (file: File): Promise<ParseResult> => {
           }
 
           console.log(`Successfully parsed ${snps.length} SNPs.`);
-          if (snps.length > 0) console.log('First SNP parsed:', snps[0]);
 
           resolve({
             snps,
@@ -112,9 +99,56 @@ export const parseDNAFile = (file: File): Promise<ParseResult> => {
           reject(e);
         }
       },
-      error: (err) => {
+      error: (err: unknown) => {
         reject(err);
       }
     });
+  });
+};
+
+export const parseDNAFile = async (file: File): Promise<ParseResult> => {
+  // Check for Zip File
+  if (file.type === 'application/zip' || file.name.endsWith('.zip')) {
+    try {
+      console.log('Unzipping file:', file.name);
+      const zip = new JSZip();
+      const contents = await zip.loadAsync(file);
+
+      // Find the first text file
+      const textFile = Object.values(contents.files).find(f =>
+        !f.dir && (f.name.endsWith('.txt') || f.name.endsWith('.csv'))
+      );
+
+      if (!textFile) {
+        throw new Error("No valid DNA data file (.txt or .csv) found in the zip archive.");
+      }
+
+      const fileContent = await textFile.async('string');
+      return parseTextContent(fileContent, textFile.name);
+
+    } catch (err) {
+      console.error("Zip extraction failed:", err);
+      throw new Error("Failed to process zip file. Please ensure it contains a valid raw data file.");
+    }
+  }
+
+  // Handle Standard Text/CSV File
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      const text = e.target?.result as string;
+      if (!text) {
+        reject(new Error("Empty file"));
+        return;
+      }
+      try {
+        const result = await parseTextContent(text, file.name);
+        resolve(result);
+      } catch (err) {
+        reject(err);
+      }
+    };
+    reader.onerror = () => reject(new Error("Failed to read file"));
+    reader.readAsText(file);
   });
 };

@@ -1,16 +1,16 @@
 import React, { useMemo } from 'react';
 import type { SNP } from '../utils/DNAParser';
-import { riskAlleles, type RiskAllele } from '../data/RiskAlleles';
+import { riskAlleles } from '../data/RiskAlleles';
+import { generateRiskPDF, type DetectedRisk } from '../utils/pdfGenerator';
 
 interface RiskReportProps {
   snps: SNP[];
 }
 
-interface DetectedRisk {
-  riskInfo: RiskAllele;
-  userGenotype: string;
-  matchType: 'HO' | 'HE'; // Homozygous or Heterozygous for risk
-}
+// Ensure DetectedRisk matches our utility definition or just export/import it
+// Since I defined DetectedRisk inside RiskReport originally, let's just use the one from pdfGenerator to be safe/consistent, 
+// OR map it. The structure is the same.
+
 
 const RiskReport: React.FC<RiskReportProps> = ({ snps }) => {
   // Memoize the risk calculation
@@ -70,9 +70,17 @@ const RiskReport: React.FC<RiskReportProps> = ({ snps }) => {
   return (
     <div className="space-y-6">
       <div className="bg-white border border-slate-200 rounded-xl shadow-sm p-8 animate-fade-in-up">
-        <h2 className="text-2xl font-bold text-slate-900 mb-6 flex items-center gap-3 border-b border-slate-100 pb-4">
-          <span className="text-blue-600">🧬</span> Genetic Risk Analysis
-        </h2>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 border-b border-slate-100 pb-4">
+          <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-3">
+            <span className="text-blue-600">🧬</span> Genetic Risk Analysis
+          </h2>
+          <button
+            onClick={() => generateRiskPDF(detectedRisks, snps.length, "User Upload")}
+            className="flex items-center gap-2 px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-sm font-medium rounded-lg transition-all shadow-sm"
+          >
+            <span>📄</span> Download Report
+          </button>
+        </div>
 
         <div className="grid gap-4">
           {detectedRisks.map((risk, idx) => (
