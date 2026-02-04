@@ -1,54 +1,51 @@
 @import "tailwindcss";
 
 @theme {
-  --color-indigo-500: #6366f1;
-  --color-purple-600: #9333ea;
-  --color-pink-500: #ec4899;
+  --color-brand-600: #2563eb;
+  --color-brand-700: #1d4ed8;
+  --color-brand-800: #1e40af;
 }
 
 @layer base {
   body {
-    @apply bg-[#030712] text-slate-200 antialiased;
-    background-image: 
-      radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.15) 0px, transparent 50%),
-      radial-gradient(at 100% 100%, rgba(168, 85, 247, 0.15) 0px, transparent 50%);
+    @apply bg-slate-50 text-slate-900 antialiased font-sans;
   }
 }
 
 @layer components {
   .glass-card {
-    @apply bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl;
+    @apply bg-white border border-slate-200 rounded-lg shadow-sm;
   }
   
   .glass-card-elevated {
-    @apply bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    @apply bg-white border border-slate-200 rounded-xl shadow-lg;
   }
 
   .gradient-text {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 font-extrabold;
+    @apply text-slate-900 font-bold;
   }
 
   .btn-primary {
-    @apply px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold rounded-xl transition-all shadow-lg hover:shadow-indigo-500/25 active:scale-95;
+    @apply px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors shadow-sm;
   }
 
   .btn-ghost {
-    @apply px-4 py-2 text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-all;
+    @apply px-4 py-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors;
   }
 
   .glow-accent {
-    box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
+    /* No glow for business theme */
+    @apply shadow-none;
   }
 
   .upload-zone {
-    @apply border-2 border-dashed border-white/10 hover:border-indigo-500/50 transition-colors;
+    @apply border-2 border-dashed border-slate-300 hover:border-blue-500 hover:bg-slate-50 transition-colors bg-white;
   }
 
   .dna-loader {
     width: 48px;
     height: 48px;
-    border: 5px solid #6366f1;
+    border: 5px solid #2563eb;
     border-bottom-color: transparent;
     border-radius: 50%;
     display: inline-block;
@@ -62,13 +59,13 @@
   }
 
   .animate-fade-in-up {
-    animation: fadeInUp 0.6s ease-out forwards;
+    animation: fadeInUp 0.5s ease-out forwards;
   }
 
   @keyframes fadeInUp {
     from {
       opacity: 0;
-      transform: translateY(20px);
+      transform: translateY(10px);
     }
     to {
       opacity: 1;
@@ -76,12 +73,13 @@
     }
   }
 
+  /* Subtler animation for business look */
   .animate-float {
-    animation: float 3s ease-in-out infinite;
+    animation: float 4s ease-in-out infinite;
   }
 
   @keyframes float {
     0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-20px); }
+    50% { transform: translateY(-5px); }
   }
 }

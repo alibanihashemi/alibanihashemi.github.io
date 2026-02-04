@@ -8,19 +8,19 @@ interface GenomeBrowserProps {
 const Row = ({ index, style, data }: { index: number; style: React.CSSProperties; data: SNP[] }) => {
   const snp = data[index];
   return (
-    <div style={style} className="flex items-center justify-between px-4 py-2 border-b border-white/10 hover:bg-white/5 text-sm">
-      <span className="font-mono text-indigo-300 w-1/4 truncate">{snp.rsid}</span>
-      <span className="w-1/4 text-center text-gray-400">Chr {snp.chromosome}</span>
-      <span className="w-1/4 text-right text-gray-500">{snp.position}</span>
-      <span className="w-1/4 text-right font-bold text-white">{snp.genotype}</span>
+    <div style={style} className="flex items-center justify-between px-4 py-2 border-b border-slate-100 hover:bg-slate-50 text-sm transition-colors">
+      <span className="font-mono text-blue-600 font-medium w-1/4 truncate">{snp.rsid}</span>
+      <span className="w-1/4 text-center text-slate-500">Chr {snp.chromosome}</span>
+      <span className="w-1/4 text-right text-slate-400 font-mono">{snp.position}</span>
+      <span className="w-1/4 text-right font-bold text-slate-900">{snp.genotype}</span>
     </div>
   );
 };
 
 const GenomeBrowser: React.FC<GenomeBrowserProps> = ({ snps }) => {
   return (
-    <div className="glass-card-elevated p-0 overflow-hidden flex flex-col h-[500px]">
-      <div className="p-4 bg-white/5 border-b border-white/10 flex justify-between font-semibold text-gray-300 text-sm">
+    <div className="bg-white border border-slate-200 rounded-xl shadow-sm p-0 overflow-hidden flex flex-col h-[500px]">
+      <div className="p-4 bg-slate-50 border-b border-slate-200 flex justify-between font-semibold text-slate-700 text-sm">
         <span className="w-1/4">RSID</span>
         <span className="w-1/4 text-center">Chr</span>
         <span className="w-1/4 text-right">Pos</span>

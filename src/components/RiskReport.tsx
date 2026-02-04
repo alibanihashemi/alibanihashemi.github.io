@@ -53,10 +53,10 @@ const RiskReport: React.FC<RiskReportProps> = ({ snps }) => {
 
   if (detectedRisks.length === 0) {
     return (
-      <div className="glass-card-elevated p-8 text-center animate-fade-in-up">
+      <div className="bg-white border border-slate-200 rounded-xl shadow-sm p-8 text-center animate-fade-in-up">
         <div className="text-6xl mb-4">👍</div>
-        <h2 className="text-2xl font-bold text-white mb-2">No Specific Risks Detected</h2>
-        <p className="text-gray-400">
+        <h2 className="text-2xl font-bold text-slate-900 mb-2">No Specific Risks Detected</h2>
+        <p className="text-slate-500">
           Based on the limited set of checking criteria, no significant genetic risks were identified in your data.
           Note that this is not a medical diagnosis.
         </p>
@@ -66,47 +66,47 @@ const RiskReport: React.FC<RiskReportProps> = ({ snps }) => {
 
   return (
     <div className="space-y-6">
-      <div className="glass-card-elevated p-6 animate-fade-in-up">
-        <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
-          <span className="text-indigo-400">🧬</span> Genetic Risk Analysis
+      <div className="bg-white border border-slate-200 rounded-xl shadow-sm p-8 animate-fade-in-up">
+        <h2 className="text-2xl font-bold text-slate-900 mb-6 flex items-center gap-3 border-b border-slate-100 pb-4">
+          <span className="text-blue-600">🧬</span> Genetic Risk Analysis
         </h2>
 
         <div className="grid gap-4">
           {detectedRisks.map((risk, idx) => (
             <div
               key={`${risk.riskInfo.rsid}-${idx}`}
-              className="glass-card p-4 border-l-4 transition-all hover:bg-white/5"
+              className="bg-slate-50 border border-slate-200 rounded-lg p-5 border-l-4 transition-all hover:shadow-md"
               style={{
-                borderColor: risk.matchType === 'HO' ? '#ef4444' : '#f59e0b' // Red for Homozygous, Orange for Heterozygous
+                borderLeftColor: risk.matchType === 'HO' ? '#ef4444' : '#f59e0b' // Red for Homozygous, Orange for Heterozygous
               }}
             >
               <div className="flex flex-col md:flex-row justify-between md:items-start gap-4">
                 <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="font-bold text-lg text-white">{risk.riskInfo.condition}</span>
-                    <span className={`text-xs px-2 py-0.5 rounded-full ${risk.matchType === 'HO'
-                      ? 'bg-red-500/20 text-red-300 border border-red-500/30'
-                      : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="font-bold text-lg text-slate-900">{risk.riskInfo.condition}</span>
+                    <span className={`text-xs px-2 py-0.5 rounded-full border ${risk.matchType === 'HO'
+                      ? 'bg-red-50 text-red-700 border-red-200'
+                      : 'bg-amber-50 text-amber-700 border-amber-200'
                       }`}>
                       {risk.matchType === 'HO' ? 'High Impact' : 'Moderate Impact'}
                     </span>
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30">
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
                       {risk.riskInfo.category}
                     </span>
                   </div>
 
-                  <p className="text-gray-300 text-sm mb-2">{risk.riskInfo.description}</p>
+                  <p className="text-slate-600 text-sm mb-3">{risk.riskInfo.description}</p>
 
-                  <div className="flex items-center gap-4 text-xs font-mono text-gray-500">
-                    <span>Gene: <span className="text-gray-400">{risk.riskInfo.gene}</span></span>
-                    <span>SNP: <span className="text-gray-400">{risk.riskInfo.rsid}</span></span>
-                    <span>Risk Allele: <span className="text-gray-400">{risk.riskInfo.riskAllele}</span></span>
+                  <div className="flex items-center gap-4 text-xs font-mono text-slate-500">
+                    <span className="bg-white px-2 py-1 rounded border border-slate-200">Gene: <span className="font-semibold text-slate-700">{risk.riskInfo.gene}</span></span>
+                    <span className="bg-white px-2 py-1 rounded border border-slate-200">SNP: <span className="font-semibold text-slate-700">{risk.riskInfo.rsid}</span></span>
+                    <span className="bg-white px-2 py-1 rounded border border-slate-200">Risk Allele: <span className="font-bold text-slate-900">{risk.riskInfo.riskAllele}</span></span>
                   </div>
                 </div>
 
-                <div className="flex flex-col items-end min-w-[100px]">
-                  <span className="text-xs text-gray-500 uppercase tracking-wider mb-1">Genotype</span>
-                  <span className={`text-2xl font-bold ${risk.matchType === 'HO' ? 'text-red-400' : 'text-amber-400'
+                <div className="flex flex-col items-end min-w-[100px] bg-white p-2 rounded border border-slate-100">
+                  <span className="text-xs text-slate-400 uppercase tracking-wider mb-1">Genotype</span>
+                  <span className={`text-2xl font-bold ${risk.matchType === 'HO' ? 'text-red-600' : 'text-amber-500'
                     }`}>
                     {risk.userGenotype}
                   </span>

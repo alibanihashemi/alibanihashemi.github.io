@@ -90,10 +90,10 @@ const BabyRiskReport: React.FC<BabyRiskReportProps> = ({
 
     if (predictions.length === 0) {
         return (
-            <div className="glass-card-elevated p-8 text-center animate-fade-in-up">
+            <div className="bg-white border border-slate-200 rounded-xl shadow-sm p-8 text-center animate-fade-in-up">
                 <div className="text-6xl mb-4">👶✨</div>
-                <h2 className="text-2xl font-bold text-white mb-2">No High Risks Predicted</h2>
-                <p className="text-gray-400">
+                <h2 className="text-2xl font-bold text-slate-900 mb-2">No High Risks Predicted</h2>
+                <p className="text-slate-500">
                     Based on the parents' genetic data, there are no significant risks identified for the categories we track.
                 </p>
             </div>
@@ -102,12 +102,12 @@ const BabyRiskReport: React.FC<BabyRiskReportProps> = ({
 
     return (
         <div className="space-y-6">
-            <div className="glass-card-elevated p-6 animate-fade-in-up">
-                <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-2xl font-bold text-white flex items-center gap-3">
-                        <span className="text-pink-400">👶</span> Future Child Risk Assessment
+            <div className="bg-white border border-slate-200 rounded-xl shadow-sm p-8 animate-fade-in-up">
+                <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-100">
+                    <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-3">
+                        <span className="text-blue-500">👶</span> Future Child Risk Assessment
                     </h2>
-                    <span className="text-xs text-gray-500 glass-card px-2 py-1">
+                    <span className="text-xs text-slate-500 bg-slate-100 px-3 py-1 rounded-full border border-slate-200">
                         Mendelian Inheritance Model
                     </span>
                 </div>
@@ -116,54 +116,56 @@ const BabyRiskReport: React.FC<BabyRiskReportProps> = ({
                     {predictions.map((pred, idx) => (
                         <div
                             key={`${pred.riskInfo.rsid}-${idx}`}
-                            className="glass-card p-0 overflow-hidden transition-all hover:bg-white/5"
+                            className="bg-slate-50 border border-slate-200 rounded-lg overflow-hidden transition-all hover:shadow-md"
                         >
-                            <div className="p-4 flex flex-col md:flex-row gap-6">
+                            <div className="p-5 flex flex-col md:flex-row gap-8">
 
                                 {/* Risk Info */}
                                 <div className="flex-1">
-                                    <div className="flex items-center gap-2 mb-2">
-                                        <span className="font-bold text-lg text-white">{pred.riskInfo.condition}</span>
-                                        <span className={`text-xs px-2 py-0.5 rounded-full ${pred.probability >= 0.75
-                                            ? 'bg-red-500/20 text-red-300 border border-red-500/30'
+                                    <div className="flex items-center gap-3 mb-2">
+                                        <span className="font-bold text-lg text-slate-900">{pred.riskInfo.condition}</span>
+                                        <span className={`text-xs px-2 py-0.5 rounded-full border ${pred.probability >= 0.75
+                                            ? 'bg-red-50 text-red-700 border-red-200'
                                             : pred.probability >= 0.5
-                                                ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
-                                                : 'bg-blue-500/20 text-blue-300 border border-blue-500/30'
+                                                ? 'bg-amber-50 text-amber-700 border-amber-200'
+                                                : 'bg-blue-50 text-blue-700 border-blue-200'
                                             }`}>
                                             {(pred.probability * 100).toFixed(0)}% Probability
                                         </span>
                                     </div>
-                                    <p className="text-gray-300 text-sm mb-3">{pred.riskInfo.description}</p>
+                                    <p className="text-slate-600 text-sm mb-4">{pred.riskInfo.description}</p>
 
                                     {/* Inheritance Visual */}
-                                    <div className="bg-black/20 rounded-lg p-3 flex items-center justify-around text-center">
+                                    <div className="bg-white border border-slate-200 rounded-lg p-4 flex items-center justify-around text-center">
                                         <div>
-                                            <div className="text-xs text-indigo-400 mb-1">{parent1Name}</div>
-                                            <div className="text-xl font-mono font-bold text-white">{pred.p1Genotype}</div>
+                                            <div className="text-xs text-slate-500 mb-1">{parent1Name}</div>
+                                            <div className="text-xl font-mono font-bold text-slate-800">{pred.p1Genotype}</div>
                                         </div>
-                                        <div className="text-gray-500 text-lg">+</div>
+                                        <div className="text-slate-300 text-lg">+</div>
                                         <div>
-                                            <div className="text-xs text-pink-400 mb-1">{parent2Name}</div>
-                                            <div className="text-xl font-mono font-bold text-white">{pred.p2Genotype}</div>
+                                            <div className="text-xs text-slate-500 mb-1">{parent2Name}</div>
+                                            <div className="text-xl font-mono font-bold text-slate-800">{pred.p2Genotype}</div>
                                         </div>
-                                        <div className="text-gray-500 text-lg">→</div>
+                                        <div className="text-slate-300 text-lg">→</div>
                                         <div>
-                                            <div className="text-xs text-green-400 mb-1">Child Risk</div>
-                                            <div className="text-xl font-bold text-white">
-                                                {pred.averageRiskCopies.toFixed(1)} <span className="text-xs font-normal text-gray-400">copies</span>
+                                            <div className="text-xs text-blue-600 font-medium mb-1">Child Risk</div>
+                                            <div className="text-xl font-bold text-slate-900">
+                                                {pred.averageRiskCopies.toFixed(1)} <span className="text-xs font-normal text-slate-400">copies</span>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
 
                                 {/* Punnett Visualization */}
-                                <div className="w-full md:w-48 bg-white/5 rounded-lg p-3 flex flex-col justify-center">
-                                    <div className="text-xs text-center text-gray-500 mb-2">Possible Genotypes</div>
-                                    <div className="grid grid-cols-2 gap-1">
+                                <div className="w-full md:w-56 bg-white border border-slate-200 rounded-lg p-4 flex flex-col justify-center">
+                                    <div className="text-xs text-center text-slate-500 mb-3 font-medium">Possible Genotypes</div>
+                                    <div className="grid grid-cols-2 gap-2">
                                         {pred.combinations.map((comb, i) => (
-                                            <div key={i} className={`text-center py-1 rounded text-sm font-mono ${comb.includes(pred.riskInfo.riskAllele)
-                                                ? (comb.split(pred.riskInfo.riskAllele).length - 1 === 2 ? 'bg-red-500/20 text-red-300' : 'bg-amber-500/20 text-amber-300')
-                                                : 'bg-green-500/20 text-green-300'
+                                            <div key={i} className={`text-center py-2 rounded text-sm font-mono border ${comb.includes(pred.riskInfo.riskAllele)
+                                                ? (comb.split(pred.riskInfo.riskAllele).length - 1 === 2 
+                                                    ? 'bg-red-50 text-red-700 border-red-100' 
+                                                    : 'bg-amber-50 text-amber-700 border-amber-100')
+                                                : 'bg-green-50 text-green-700 border-green-100'
                                                 }`}>
                                                 {comb}
                                             </div>
