@@ -172,51 +172,6 @@ function App() {
                 </span>
               </div>
 
-              <div className="mt-8 flex gap-4">
-                <button
-                  onClick={async (e) => {
-                    e.stopPropagation();
-                    setLoading(true);
-                    try {
-                      const res = await fetch('/sample.csv');
-                      const blob = await res.blob();
-                      const file = new File([blob], 'MyHeritage_sample.csv', { type: 'text/csv' });
-                      const result = await parseDNAFile(file);
-                      setData(result);
-                    } catch (err) {
-                      console.error(err);
-                      setError("Failed to load sample file.");
-                    } finally {
-                      setLoading(false);
-                    }
-                  }}
-                  className="btn-primary z-10 relative"
-                >
-                  🧪 Load MyHeritage Sample
-                </button>
-                <button
-                  onClick={async (e) => {
-                    e.stopPropagation();
-                    setLoading(true);
-                    try {
-                      const res = await fetch('/sample_23andme.txt');
-                      const blob = await res.blob();
-                      const file = new File([blob], '23andMe_sample.txt', { type: 'text/plain' });
-                      const result = await parseDNAFile(file);
-                      setData(result);
-                    } catch (err) {
-                      console.error(err);
-                      setError("Failed to load sample file.");
-                    } finally {
-                      setLoading(false);
-                    }
-                  }}
-                  className="btn-ghost border border-white/10 z-10 relative"
-                >
-                  🧪 Load 23andMe Sample
-                </button>
-              </div>
-
               {loading && (
                 <div className="mt-10 flex flex-col items-center gap-4">
                   <div className="dna-loader"></div>
@@ -283,14 +238,6 @@ function App() {
                             {loadingParent === 1 ? 'Loading...' : 'Select File'}
                           </button>
                         </div>
-                        <div className="mt-3 flex gap-2 justify-center">
-                          <button
-                            onClick={() => loadSampleForParent(1, 'myheritage')}
-                            className="text-xs text-indigo-400 hover:underline"
-                          >
-                            Load Sample
-                          </button>
-                        </div>
                       </div>
                     )}
                   </div>
@@ -329,14 +276,6 @@ function App() {
                           />
                           <button className="btn-primary w-full">
                             {loadingParent === 2 ? 'Loading...' : 'Select File'}
-                          </button>
-                        </div>
-                        <div className="mt-3 flex gap-2 justify-center">
-                          <button
-                            onClick={() => loadSampleForParent(2, '23andme')}
-                            className="text-xs text-indigo-400 hover:underline"
-                          >
-                            Load Sample
                           </button>
                         </div>
                       </div>
