@@ -5,7 +5,7 @@ export interface RiskAllele {
   condition: string;
   description: string;
   magnitude: number;
-  category: 'Metabolism' | 'Neurology' | 'Cardiology' | 'Immunology' | 'Endocrinology' | 'Carrier Status' | 'Oncology' | 'Cognitive' | 'Nutrition' | 'Other';
+  category: 'Metabolism' | 'Neurology' | 'Cardiology' | 'Immunology' | 'Endocrinology' | 'Carrier Status' | 'Oncology' | 'Cognitive' | 'Nutrition' | 'Pharmacogenomics' | 'Longevity' | 'Other';
 }
 
 export const riskAlleles: RiskAllele[] = [
@@ -263,7 +263,7 @@ export const riskAlleles: RiskAllele[] = [
     gene: 'FTO',
     riskAllele: 'A',
     condition: "Obesity Risk / Satiety",
-    description: "tStrongest genetic link to obesity. carriers have higher appetite and lower satiety. High-protein diets may be more effective.",
+    description: "Strongest genetic link to obesity. carriers have higher appetite and lower satiety. High-protein diets may be more effective.",
     magnitude: 7,
     category: 'Nutrition'
   },
@@ -294,6 +294,34 @@ export const riskAlleles: RiskAllele[] = [
     magnitude: 5,
     category: 'Nutrition'
   },
+  // Benchnmark Additions - Vitamins & Supplements
+  {
+    rsid: 'rs1544410',
+    gene: 'VDR',
+    riskAllele: 'T', // BsmI 'b' risk allele often cited as effect.
+    condition: "Vitamin D Resistance",
+    description: "Vitamin D Receptor variant associated with reduced calcium absorption and bone mineral density.",
+    magnitude: 4,
+    category: 'Nutrition'
+  },
+  {
+    rsid: 'rs7501331',
+    gene: 'BCMO1',
+    riskAllele: 'T',
+    condition: "Vitamin A Conversion",
+    description: "Reduced ability to convert beta-carotene (plant Vitamin A) into active retinol.",
+    magnitude: 5,
+    category: 'Nutrition'
+  },
+  {
+    rsid: 'rs762551',
+    gene: 'CYP1A2',
+    riskAllele: 'C',
+    condition: "Slow Caffeine Metabolism",
+    description: "Associated with slower clearance of caffeine. Carriers may have higher risk of heart issues with high coffee consumption.",
+    magnitude: 4,
+    category: 'Pharmacogenomics'
+  },
 
   // --- ONCOLOGY (Cancer Risks) ---
   {
@@ -321,6 +349,15 @@ export const riskAlleles: RiskAllele[] = [
     condition: "Lung / Digestive Cancers",
     description: "Variant in microRNA-146a associated with susceptibility to various cancers.",
     magnitude: 4,
+    category: 'Oncology'
+  },
+  {
+    rsid: 'rs1695',
+    gene: 'GSTP1',
+    riskAllele: 'G',
+    condition: "Detoxification / Oxidative Stress",
+    description: "Reduced ability to conjugate toxins. Associated with higher risk of cancers if exposed to environmental toxins.",
+    magnitude: 5,
     category: 'Oncology'
   },
 
@@ -351,6 +388,26 @@ export const riskAlleles: RiskAllele[] = [
     description: "Associated with lower transcriptional activity of Catalase, essential for breaking down hydrogen peroxide.",
     magnitude: 4,
     category: 'Metabolism'
+  },
+
+  // --- LONGEVITY & SLEEP ---
+  {
+    rsid: 'rs2802292',
+    gene: 'FOXO3',
+    riskAllele: 'T', // The G allele is the longevity one (protective). T is 'normal' or risk relative to longevity benefit.
+    condition: "Longevity Factor",
+    description: "Carrier of the 'normal' allele. The alternative G allele is strongly associated with healthy aging and longevity.",
+    magnitude: 4,
+    category: 'Longevity'
+  },
+  {
+    rsid: 'rs1801260',
+    gene: 'CLOCK',
+    riskAllele: 'C',
+    condition: "Circadian Rhythm / Sleep",
+    description: "Associated with eveningness preference ('night owls') and potential sleep duration issues.",
+    magnitude: 3,
+    category: 'Other'
   },
 
   // --- OTHER / WELLNESS ---
