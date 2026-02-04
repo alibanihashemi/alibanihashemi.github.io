@@ -21,80 +21,72 @@ export const parseDNAFile = (file: File): Promise<ParseResult> => {
     Papa.parse(file, {
       worker: true,
       skipEmptyLines: true,
+      comments: "#", // Explicitly handle # comments to avoid delimiter confusion
       complete: (results) => {
         try {
           const snps: SNP[] = [];
           let source = 'Unknown';
-          const lines = results.data as string[][];
+          const lines = results.data as string[][]; // Papa removes comments, so these are data lines
 
-          // Simple heuristic to detect source and find header
-          // 23andMe usually starts with comments #
-          // MyHeritage usually starts with "MyHeritage DNA raw data" header or similar
+          // Heuristic to detect source based on file content (even if comments are stripped)
+          // 23andMe usually has 4 columns: rsid, chromosome, position, genotype
+          if (lines.length > 0) {
+            // Look for a line that starts with 'rs'
+            const firstLineWithData = lines.find(l => {
+              // If Papa failed to split tabs, l[0] might contain the whole line
+              const s = l[0].toString();
+              return s.startsWith('rs') || (l.length > 1 && l[0].startsWith('rs'));
+            });
 
-          let headerFound = false;
-          let startIndex = 0;
-
-          // Check first few lines for comments to determine source/start
-          for (let i = 0; i < Math.min(100, lines.length); i++) {
-            const line = lines[i];
-            if (line.length === 0) continue;
-            const lineStr = line.join(' ');
-
-            if (lineStr.includes('23andMe')) source = '23andMe';
-            if (lineStr.includes('MyHeritage')) source = 'MyHeritage';
-            if (lineStr.includes('Ancestry')) source = 'Ancestry';
-            console.log(`Detected source: ${source}`);
-
-            // Detect header row (rsid, chromosome, position, genotype)
-            if (
-              (lineStr.toLowerCase().includes('rsid') || lineStr.toLowerCase().includes('rs id')) &&
-              lineStr.toLowerCase().includes('chromosome')
-            ) {
-              startIndex = i + 1;
-              headerFound = true;
-              break;
-            }
-
-            // If line starts with #, it's a comment
-            if (line[0].startsWith('#')) {
-              continue;
+            if (firstLineWithData) {
+              if (firstLineWithData.length === 4) source = '23andMe';
+              // MyHeritage often has 5 columns or different structure
             }
           }
 
-          if (!headerFound) {
-            // Fallback: try to guess where data starts (first line that looks like data)
-            // rs... 1 12345 AA
-            for (let i = 0; i < Math.min(100, lines.length); i++) {
-              const line = lines[i];
-              if (line.length >= 3 && line[0].startsWith('rs')) {
-                startIndex = i;
-                break;
-              }
-            }
-          }
+          // Use file name as a secondary hint
+          if (file.name.toLowerCase().includes('23andme')) source = '23andMe';
+          if (file.name.toLowerCase().includes('myheritage')) source = 'MyHeritage';
+          if (file.name.toLowerCase().includes('ancestry')) source = 'Ancestry';
 
-          for (let i = startIndex; i < lines.length; i++) {
+          console.log(`Detected source: ${source}`);
+
+          for (let i = 0; i < lines.length; i++) {
             const row = lines[i];
-            // Normalize row logic based on common formats
-            // 23andMe: rsid, chromosome, position, genotype
-            // MyHeritage: rsid, chromosome, position, result (genotype)
-            // Ancestry: rsid, chromosome, position, allele1, allele2
 
-            if (row.length < 3) continue;
+            // Skip header if it got through (though comments: '#' should catch most 23andMe headers)
+            if (row[0] === 'rsid' || row[0] === '# rsid') continue;
 
-            let rsid = row[0];
-            let chromosome = row[1];
-            let position = parseInt(row[2]);
+            if (row.length === 0) continue;
+
+            // 23andMe format: rsid, chromosome, position, genotype
+            // Sometimes tab separated, Papa parse handles this if auto-detect works, 
+            // but if it failed to detect tab, row might be length 1.
+
+            let parts = row;
+            if (row.length === 1 && typeof row[0] === 'string' && row[0].includes('\t')) {
+              // Manual fallback for tab separation if Papa failed
+              parts = row[0].split('\t');
+            }
+
+            if (parts.length < 3) continue;
+
+            let rsid = parts[0];
+            let chromosome = parts[1];
+            let position = parseInt(parts[2]);
             let genotype = '';
 
-            if (row.length === 4) {
-              genotype = row[3];
-            } else if (row.length === 5) {
-              genotype = row[3] + row[4];
+            if (parts.length === 4) {
+              genotype = parts[3];
+            } else if (parts.length >= 5) {
+              genotype = parts[3] + parts[4];
             }
 
-            // Basic validation
+            // Clean genotype (remove newlines, spaces)
+            genotype = genotype ? genotype.trim() : '';
+
             if (!rsid || !chromosome || isNaN(position) || !genotype) continue;
+            if (genotype === '--' || genotype === '__') continue; // Skip no-calls
 
             snps.push({
               rsid,
