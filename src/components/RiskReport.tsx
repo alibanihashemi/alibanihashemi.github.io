@@ -40,7 +40,7 @@ const RiskReport: React.FC<RiskReportProps> = ({ snps }) => {
         }
 
         if (riskCount > 0) {
-          console.log(`MATCH DETECTED: ${risk.riskInfo.condition} (${risk.matchType})`);
+          console.log(`MATCH DETECTED: ${risk.condition} (${riskCount === 2 ? 'HO' : 'HE'})`);
           findings.push({
             riskInfo: risk,
             userGenotype,
