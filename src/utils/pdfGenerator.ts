@@ -53,27 +53,35 @@ export const generateRiskPDF = (risks: DetectedRisk[], snpCount: number, source:
         r.matchType === 'HO' ? 'High' : 'Medium',
         r.userGenotype,
         r.riskInfo.gene,
-        r.riskInfo.description
+        r.riskInfo.description,
+        r.riskInfo.recommendation // Add Recommendation to data
     ]);
 
     autoTable(doc, {
         startY: 85,
-        head: [['Condition', 'Category', 'Impact', 'Genotype', 'Gene', 'Description']],
+        head: [['Condition', 'Category', 'Impact', 'Genotype', 'Gene', 'Description', 'Action / Recommendation']],
         body: tableData,
         theme: 'grid',
         headStyles: {
             fillColor: [37, 99, 235],
             textColor: 255,
-            fontStyle: 'bold'
+            fontStyle: 'bold',
+            halign: 'center'
         },
         styles: {
-            fontSize: 9,
-            cellPadding: 3,
-            overflow: 'linebreak'
+            fontSize: 8, // Decrease font size slightly to fit more content
+            cellPadding: 2,
+            overflow: 'linebreak',
+            valign: 'middle'
         },
         columnStyles: {
-            0: { fontStyle: 'bold', cellWidth: 30 },
-            5: { cellWidth: 'auto' }
+            0: { fontStyle: 'bold', cellWidth: 25 }, // Condition
+            1: { cellWidth: 20 }, // Category
+            2: { cellWidth: 15, halign: 'center' }, // Impact
+            3: { cellWidth: 15, halign: 'center' }, // Genotype
+            4: { cellWidth: 15, fontStyle: 'italic' }, // Gene
+            5: { cellWidth: 45 }, // Description
+            6: { cellWidth: 'auto', fontStyle: 'bold' } // Recommendation - allow to expand
         },
         alternateRowStyles: {
             fillColor: [245, 247, 250]
@@ -87,6 +95,10 @@ export const generateRiskPDF = (risks: DetectedRisk[], snpCount: number, source:
                 } else {
                     data.cell.styles.textColor = [217, 119, 6]; // Amber
                 }
+            }
+            // Highlight recommendation column slightly
+            if (data.section === 'body' && data.column.index === 6) {
+                data.cell.styles.textColor = [22, 101, 52]; // Dark Green for action
             }
         }
     });
