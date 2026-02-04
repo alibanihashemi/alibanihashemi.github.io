@@ -108,6 +108,15 @@ const RiskReport: React.FC<RiskReportProps> = ({ snps }) => {
 
                   <p className="text-slate-600 text-sm mb-3">{risk.riskInfo.description}</p>
 
+                  <div className="bg-green-50 border border-green-200 rounded p-3 mb-3">
+                    <p className="text-xs font-bold text-green-800 uppercase tracking-wide mb-1">
+                      ✅ Recommended Action
+                    </p>
+                    <p className="text-sm text-green-900">
+                      {risk.riskInfo.recommendation}
+                    </p>
+                  </div>
+
                   <div className="flex items-center gap-4 text-xs font-mono text-slate-500">
                     <span className="bg-white px-2 py-1 rounded border border-slate-200">Gene: <span className="font-semibold text-slate-700">{risk.riskInfo.gene}</span></span>
                     <span className="bg-white px-2 py-1 rounded border border-slate-200">SNP: <span className="font-semibold text-slate-700">{risk.riskInfo.rsid}</span></span>
